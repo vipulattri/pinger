@@ -1,25 +1,27 @@
-const https = require('https');
+// server.js
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-console.log('Pinger started...');
+// Background worker logic (example)
+const pingURL = 'https://vipul-attri-portfolio.netlify.app/';
+const interval = 5 * 60 * 1000; // 5 minutes
 
-const urls = [
-  'https://pinger-pj83.onrender.com/',
-  'https://vipul-attri-portfolio.netlify.app/',
-  'https://pinger2-p72y.onrender.com',
-  // '// <-- Replace this with your second website
-];
+const pingWebsite = () => {
+    fetch(pingURL)
+        .then(res => console.log(`[${new Date().toLocaleTimeString()}] Pinged: ${pingURL} Status: ${res.status}`))
+        .catch(err => console.error('Ping error:', err));
+};
 
-function pingWebsite(url) {
-  https.get(url, (res) => {
-    console.log(`[${new Date().toLocaleTimeString()}] Pinged ${url} - Status Code: ${res.statusCode}`);
-  }).on('error', (err) => {
-    console.error(`[${new Date().toLocaleTimeString()}] Error pinging ${url}:`, err.message);
-  });
-}
+// Start background pinger
+setInterval(pingWebsite, interval);
+pingWebsite(); // Run immediately too
 
-function pingAllWebsites() {
-  urls.forEach(pingWebsite);
-}
+// Minimal Express server to keep service alive
+app.get('/', (req, res) => {
+    res.send('Background worker is running! ✅');
+});
 
-pingAllWebsites();
-setInterval(pingAllWebsites, 30000);
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
